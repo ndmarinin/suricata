@@ -29,6 +29,10 @@
 
 long long g_detect_run_total = 0;
 int g_detect_run_count = 0;
+long long g_detect_flow_total = 0;
+int g_detect_flow_count = 0;
+long long g_detect_prefilter_total = 0;
+int g_detect_prefilter_count = 0;
 
 #include "decode.h"
 #include "packet.h"
@@ -602,6 +606,10 @@ static inline bool DetectRunInspectRuleHeader(const Packet *p, const Flow *f, co
 static inline void DetectRunPrefilterPkt(ThreadVars *tv, const DetectEngineCtx *de_ctx,
         DetectEngineThreadCtx *det_ctx, Packet *p, DetectRunScratchpad *scratch)
 {
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    long elapsed;
+
     /* create our prefilter mask */
     PacketCreateMask(p, &p->sig_mask, scratch->alproto, scratch->app_decoder_events);
     /* run the prefilter engines */
@@ -617,6 +625,11 @@ static inline void DetectRunPrefilterPkt(ThreadVars *tv, const DetectEngineCtx *
         DetectPrefilterCopyDeDup(de_ctx, det_ctx);
         PACKET_PROFILING_DETECT_END(p, PROF_DETECT_PF_SORT2);
     }
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+    g_detect_prefilter_total += elapsed;
+    g_detect_prefilter_count++;
 }
 
 /** \internal
@@ -2258,6 +2271,10 @@ static void DetectFlow(ThreadVars *tv,
                        DetectEngineCtx *de_ctx, DetectEngineThreadCtx *det_ctx,
                        Packet *p)
 {
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    long elapsed;
+
     Flow *const f = p->flow;
 
     /* we check the flow drop here, and not the packet drop. This is
@@ -2265,6 +2282,10 @@ static void DetectFlow(ThreadVars *tv,
      * evaluated by the stream event rules. */
     if (f->flags & FLOW_ACTION_DROP) {
         DEBUG_VALIDATE_BUG_ON(!(PKT_IS_PSEUDOPKT(p)) && !PacketCheckAction(p, ACTION_DROP));
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+        g_detect_flow_total += elapsed;
+        g_detect_flow_count++;
         SCReturn;
     }
 
@@ -2294,11 +2315,20 @@ static void DetectFlow(ThreadVars *tv,
         }
         SCLogDebug("p->pcap %"PRIu64": no detection on packet, "
                 "PKT_NOPACKET_INSPECTION is set", p->pcap_cnt);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+        g_detect_flow_total += elapsed;
+        g_detect_flow_count++;
         return;
     }
 
     /* see if the packet matches one or more of the sigs */
     DetectRun(tv, de_ctx, det_ctx, p);
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+    g_detect_flow_total += elapsed;
+    g_detect_flow_count++;
 }
 
 

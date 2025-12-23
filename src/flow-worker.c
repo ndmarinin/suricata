@@ -33,6 +33,10 @@
 
 #include "suricata-common.h"
 #include "suricata.h"
+#include <time.h>
+
+long long g_flow_worker_total = 0;
+int g_flow_worker_count = 0;
 
 #include "action-globals.h"
 #include "packet.h"
@@ -556,6 +560,10 @@ static void PacketAppUpdate2FlowFlags(Packet *p)
 
 static TmEcode FlowWorker(ThreadVars *tv, Packet *p, void *data)
 {
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    long elapsed;
+
     FlowWorkerThreadData *fw = data;
     DetectEngineThreadCtx *det_ctx = SC_ATOMIC_GET(fw->detect_thread);
 
@@ -570,6 +578,10 @@ static TmEcode FlowWorker(ThreadVars *tv, Packet *p, void *data)
         /* Ack if a flush was requested */
         bool notset = false;
         SC_ATOMIC_CAS(&fw->flush_ack, notset, true);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+        g_flow_worker_total += elapsed;
+        g_flow_worker_count++;
         return TM_ECODE_OK;
     }
 
@@ -734,6 +746,10 @@ housekeeping:
     /* process local work queue */
     FlowWorkerProcessLocalFlows(tv, fw, p);
 
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+    g_flow_worker_total += elapsed;
+    g_flow_worker_count++;
     return TM_ECODE_OK;
 }
 

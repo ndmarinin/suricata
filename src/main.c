@@ -67,27 +67,59 @@ int main(int argc, char **argv)
 
     // Print timing summary
     printf("\n=== Suricata Timing Summary ===\n");
+    long long total_measured = g_decode_ethernet_total + g_app_layer_parser_total + g_detect_run_total +
+                               g_detect_flow_total + g_flow_worker_total + g_detect_prefilter_total;
+    printf("Total Measured Time: %lld ns\n\n", total_measured);
+
     if (g_decode_ethernet_count > 0) {
-        printf("Packet Parsing (DecodeEthernet): Total %lld ns, Count %d, Average %.2f ns\n",
-               g_decode_ethernet_total, g_decode_ethernet_count,
+        double pct = (double)g_decode_ethernet_total / total_measured * 100.0;
+        printf("Packet Parsing (DecodeEthernet): Total %lld ns (%.2f%%), Count %d, Average %.2f ns\n",
+               g_decode_ethernet_total, pct, g_decode_ethernet_count,
                (double)g_decode_ethernet_total / g_decode_ethernet_count);
     } else {
         printf("Packet Parsing (DecodeEthernet): No calls\n");
     }
     if (g_app_layer_parser_count > 0) {
-        printf("Data Management/App-Layer Parsing (AppLayerParserParse): Total %lld ns, Count %d, Average %.2f ns\n",
-               g_app_layer_parser_total, g_app_layer_parser_count,
+        double pct = (double)g_app_layer_parser_total / total_measured * 100.0;
+        printf("Data Management/App-Layer Parsing (AppLayerParserParse): Total %lld ns (%.2f%%), Count %d, Average %.2f ns\n",
+               g_app_layer_parser_total, pct, g_app_layer_parser_count,
                (double)g_app_layer_parser_total / g_app_layer_parser_count);
     } else {
         printf("Data Management/App-Layer Parsing (AppLayerParserParse): No calls\n");
     }
     if (g_detect_run_count > 0) {
-        printf("Threat Detection (DetectRun): Total %lld ns, Count %d, Average %.2f ns\n",
-               g_detect_run_total, g_detect_run_count,
+        double pct = (double)g_detect_run_total / total_measured * 100.0;
+        printf("Threat Detection (DetectRun): Total %lld ns (%.2f%%), Count %d, Average %.2f ns\n",
+               g_detect_run_total, pct, g_detect_run_count,
                (double)g_detect_run_total / g_detect_run_count);
     } else {
         printf("Threat Detection (DetectRun): No calls\n");
     }
+    if (g_detect_flow_count > 0) {
+        double pct = (double)g_detect_flow_total / total_measured * 100.0;
+        printf("Flow-Based Detection (DetectFlow): Total %lld ns (%.2f%%), Count %d, Average %.2f ns\n",
+               g_detect_flow_total, pct, g_detect_flow_count,
+               (double)g_detect_flow_total / g_detect_flow_count);
+    } else {
+        printf("Flow-Based Detection (DetectFlow): No calls\n");
+    }
+    if (g_flow_worker_count > 0) {
+        double pct = (double)g_flow_worker_total / total_measured * 100.0;
+        printf("Flow Worker/Streaming Processing (FlowWorker): Total %lld ns (%.2f%%), Count %d, Average %.2f ns\n",
+               g_flow_worker_total, pct, g_flow_worker_count,
+               (double)g_flow_worker_total / g_flow_worker_count);
+    } else {
+        printf("Flow Worker/Streaming Processing (FlowWorker): No calls\n");
+    }
+    if (g_detect_prefilter_count > 0) {
+        double pct = (double)g_detect_prefilter_total / total_measured * 100.0;
+        printf("Prefiltering (DetectRunPrefilterPkt): Total %lld ns (%.2f%%), Count %d, Average %.2f ns\n",
+               g_detect_prefilter_total, pct, g_detect_prefilter_count,
+               (double)g_detect_prefilter_total / g_detect_prefilter_count);
+    } else {
+        printf("Prefiltering (DetectRunPrefilterPkt): No calls\n");
+    }
+    printf("\nNote: Some functions call others (e.g., FlowWorker calls Detect, which calls DetectFlow and DetectRun, which calls DetectRunPrefilterPkt), so measured times may overlap. Percentages are based on individual function times relative to total measured time.\n");
     printf("================================\n\n");
 
     exit(EXIT_SUCCESS);

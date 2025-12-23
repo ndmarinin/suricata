@@ -565,6 +565,12 @@ extern long long g_app_layer_parser_total;
 extern int g_app_layer_parser_count;
 extern long long g_detect_run_total;
 extern int g_detect_run_count;
+extern long long g_detect_flow_total;
+extern int g_detect_flow_count;
+extern long long g_flow_worker_total;
+extern int g_flow_worker_count;
+extern long long g_detect_prefilter_total;
+extern int g_detect_prefilter_count;
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
