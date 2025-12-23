@@ -559,6 +559,13 @@ extern int coverage_unittests;
 extern int g_ut_modules;
 extern int g_ut_covered;
 
+extern long long g_decode_ethernet_total;
+extern int g_decode_ethernet_count;
+extern long long g_app_layer_parser_total;
+extern int g_app_layer_parser_count;
+extern long long g_detect_run_total;
+extern int g_detect_run_count;
+
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
 #ifdef __cplusplus

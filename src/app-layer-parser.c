@@ -24,7 +24,11 @@
  */
 
 #include "suricata-common.h"
+#include <time.h>
 #include "app-layer-parser.h"
+
+long long g_app_layer_parser_total = 0;
+int g_app_layer_parser_count = 0;
 
 #include "flow.h"
 #include "flow-private.h"
@@ -1278,6 +1282,9 @@ int AppLayerParserParse(ThreadVars *tv, AppLayerParserThreadCtx *alp_tctx, Flow 
                         uint8_t flags, const uint8_t *input, uint32_t input_len)
 {
     SCEnter();
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    long elapsed;
 #ifdef DEBUG_VALIDATION
     BUG_ON(f->protomap != FlowGetProtoMapping(f->proto));
 #endif
@@ -1466,9 +1473,16 @@ int AppLayerParserParse(ThreadVars *tv, AppLayerParserThreadCtx *alp_tctx, Flow 
     if (consumed != input_len && f->proto == IPPROTO_TCP && f->protoctx != NULL) {
         TcpSession *ssn = f->protoctx;
         StreamTcpUpdateAppLayerProgress(ssn, direction, consumed);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+        g_app_layer_parser_total += elapsed;
+        g_app_layer_parser_count++;
         SCReturnInt(1);
     }
-
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+    g_app_layer_parser_total += elapsed;
+    g_app_layer_parser_count++;
     SCReturnInt(0);
  error:
     /* Set the no app layer inspection flag for both
@@ -1477,6 +1491,10 @@ int AppLayerParserParse(ThreadVars *tv, AppLayerParserThreadCtx *alp_tctx, Flow 
         StreamTcpDisableAppLayer(f);
     }
     AppLayerParserSetEOF(pstate);
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+    g_app_layer_parser_total += elapsed;
+    g_app_layer_parser_count++;
     SCReturnInt(-1);
 }
 

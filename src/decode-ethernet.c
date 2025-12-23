@@ -38,20 +38,35 @@
 #include "util-validate.h"
 #include "util-unittest.h"
 #include "util-debug.h"
+#include <time.h>
+
+long long g_decode_ethernet_total = 0;
+int g_decode_ethernet_count = 0;
 
 int DecodeEthernet(ThreadVars *tv, DecodeThreadVars *dtv, Packet *p,
                    const uint8_t *pkt, uint32_t len)
 {
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
     DEBUG_VALIDATE_BUG_ON(pkt == NULL);
 
     StatsIncr(tv, dtv->counter_eth);
 
     if (unlikely(len < ETHERNET_HEADER_LEN)) {
         ENGINE_SET_INVALID_EVENT(p, ETHERNET_PKT_TOO_SMALL);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        long elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+        g_decode_ethernet_total += elapsed;
+        g_decode_ethernet_count++;
         return TM_ECODE_FAILED;
     }
 
     if (!PacketIncreaseCheckLayers(p)) {
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        long elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+        g_decode_ethernet_total += elapsed;
+        g_decode_ethernet_count++;
         return TM_ECODE_FAILED;
     }
     EthernetHdr *ethh = PacketSetEthernet(p, pkt);
@@ -60,6 +75,11 @@ int DecodeEthernet(ThreadVars *tv, DecodeThreadVars *dtv, Packet *p,
 
     DecodeNetworkLayer(tv, dtv, SCNtohs(ethh->eth_type), p, pkt + ETHERNET_HEADER_LEN,
             len - ETHERNET_HEADER_LEN);
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    long elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+    g_decode_ethernet_total += elapsed;
+    g_decode_ethernet_count++;
 
     return TM_ECODE_OK;
 }

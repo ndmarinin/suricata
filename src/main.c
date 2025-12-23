@@ -65,5 +65,30 @@ int main(int argc, char **argv)
     SuricataShutdown();
     GlobalsDestroy();
 
+    // Print timing summary
+    printf("\n=== Suricata Timing Summary ===\n");
+    if (g_decode_ethernet_count > 0) {
+        printf("Packet Parsing (DecodeEthernet): Total %lld ns, Count %d, Average %.2f ns\n",
+               g_decode_ethernet_total, g_decode_ethernet_count,
+               (double)g_decode_ethernet_total / g_decode_ethernet_count);
+    } else {
+        printf("Packet Parsing (DecodeEthernet): No calls\n");
+    }
+    if (g_app_layer_parser_count > 0) {
+        printf("Data Management/App-Layer Parsing (AppLayerParserParse): Total %lld ns, Count %d, Average %.2f ns\n",
+               g_app_layer_parser_total, g_app_layer_parser_count,
+               (double)g_app_layer_parser_total / g_app_layer_parser_count);
+    } else {
+        printf("Data Management/App-Layer Parsing (AppLayerParserParse): No calls\n");
+    }
+    if (g_detect_run_count > 0) {
+        printf("Threat Detection (DetectRun): Total %lld ns, Count %d, Average %.2f ns\n",
+               g_detect_run_total, g_detect_run_count,
+               (double)g_detect_run_total / g_detect_run_count);
+    } else {
+        printf("Threat Detection (DetectRun): No calls\n");
+    }
+    printf("================================\n\n");
+
     exit(EXIT_SUCCESS);
 }

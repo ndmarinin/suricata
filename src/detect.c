@@ -24,7 +24,11 @@
  */
 
 #include "suricata-common.h"
+#include <time.h>
 #include "suricata.h"
+
+long long g_detect_run_total = 0;
+int g_detect_run_count = 0;
 
 #include "decode.h"
 #include "packet.h"
@@ -112,6 +116,8 @@ static void DetectRun(ThreadVars *th_v,
         Packet *p)
 {
     SCEnter();
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
     SCLogDebug("p->pcap_cnt %" PRIu64 " direction %s pkt_src %s", p->pcap_cnt,
             p->flow ? (FlowGetPacketDirection(p->flow, p) == TOSERVER ? "toserver" : "toclient")
                     : "noflow",
@@ -203,6 +209,10 @@ end:
     DetectRunPostRules(th_v, de_ctx, det_ctx, p, pflow, &scratch);
 
     DetectRunCleanup(det_ctx, p, pflow);
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    long elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+    g_detect_run_total += elapsed;
+    g_detect_run_count++;
     SCReturn;
 }
 

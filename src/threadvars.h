@@ -55,6 +55,15 @@ struct TmSlot_;
 #define THV_DEAD                BIT_U32(12) /**< thread has been joined with pthread_join() */
 #define THV_RUNNING             BIT_U32(13) /**< thread is running */
 
+typedef struct ThreadProfile_ {
+    uint64_t decode_ns;
+    uint64_t stream_ns;
+    uint64_t detect_ns;
+    uint64_t flow_ns;
+    uint64_t total_ns;
+    uint64_t packets;
+} ThreadProfile;
+
 /** \brief Per thread variable structure */
 typedef struct ThreadVars_ {
     pthread_t t;
@@ -139,6 +148,7 @@ typedef struct ThreadVars_ {
     /** Interface-specific thread affinity */
     char *iface_name;
 
+    ThreadProfile profile;
     Storage storage[];
 } ThreadVars;
 
