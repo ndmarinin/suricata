@@ -37,6 +37,8 @@
 
 long long g_flow_worker_total = 0;
 int g_flow_worker_count = 0;
+long long g_flow_worker_stream_tcp_update_total = 0;
+int g_flow_worker_stream_tcp_update_count = 0;
 
 #include "action-globals.h"
 #include "packet.h"
@@ -370,10 +372,18 @@ static inline void UpdateCounters(ThreadVars *tv,
 static inline void FlowWorkerStreamTCPUpdate(ThreadVars *tv, FlowWorkerThreadData *fw, Packet *p,
         DetectEngineThreadCtx *det_ctx, const bool timeout)
 {
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    long elapsed;
+
     if (det_ctx != NULL && det_ctx->de_ctx->PreStreamHook != NULL) {
         const uint8_t action = det_ctx->de_ctx->PreStreamHook(tv, det_ctx, p);
         if (action & ACTION_DROP) {
             PacketDrop(p, ACTION_DROP, PKT_DROP_REASON_STREAM_PRE_HOOK);
+            clock_gettime(CLOCK_MONOTONIC, &end);
+            elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+            g_flow_worker_stream_tcp_update_total += elapsed;
+            g_flow_worker_stream_tcp_update_count++;
             return;
         }
     }
@@ -433,6 +443,11 @@ static inline void FlowWorkerStreamTCPUpdate(ThreadVars *tv, FlowWorkerThreadDat
         // in case f->flags & FLOW_ACTION_DROP was set by one of the dequeued packets
         PacketDrop(p, ACTION_DROP, PKT_DROP_REASON_FLOW_DROP);
     }
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    elapsed = (end.tv_sec - start.tv_sec) * 1000000000L + (end.tv_nsec - start.tv_nsec);
+    g_flow_worker_stream_tcp_update_total += elapsed;
+    g_flow_worker_stream_tcp_update_count++;
 }
 
 static void FlowWorkerFlowTimeout(

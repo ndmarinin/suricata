@@ -571,6 +571,8 @@ extern long long g_flow_worker_total;
 extern int g_flow_worker_count;
 extern long long g_detect_prefilter_total;
 extern int g_detect_prefilter_count;
+extern long long g_flow_worker_stream_tcp_update_total;
+extern int g_flow_worker_stream_tcp_update_count;
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
