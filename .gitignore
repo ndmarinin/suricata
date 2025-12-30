@@ -65,3 +65,7 @@ doc/userguide/*.1
 
 # Don't ignore *.rules in rules/
 !/rules/*.rules
+html/*
+latex/*
+Doxyfile
+Doxyfile.bak
