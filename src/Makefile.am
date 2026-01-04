@@ -1299,7 +1299,7 @@ LDADD_GENERIC = "-Wl,--start-group,libsuricata_c.a,$(RUST_SURICATA_LIB),--end-gr
 else
 LDADD_GENERIC = libsuricata_c.a $(RUST_SURICATA_LIB) libsuricata_c.a $(RUST_SURICATA_LIB) $(RUST_LDADD)
 endif
-suricata_LDADD = $(LDADD_GENERIC) $(ONNXRUNTIME_LIBS)
+suricata_LDADD = $(LDADD_GENERIC) $(ONNXRUNTIME_LIBS) -lstdc++
 suricata_DEPENDENCIES = libsuricata_c.a $(RUST_SURICATA_LIB)
 
 if BUILD_SHARED_LIBRARY
