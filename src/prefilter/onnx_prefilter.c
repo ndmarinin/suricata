@@ -4,7 +4,9 @@
 #include "flow.h"
 #include "detect.h"
 
-int OnnxPrefilterFlowHook(const Packet *p, const Flow *f) {
+extern uint64_t FlowGetAge(const struct Flow *f);
+
+int OnnxPrefilterFlowHook(const struct Packet *p, const struct Flow *f) {
     float features[16];
 
     // Преобразуем Flow в признаки (пример):

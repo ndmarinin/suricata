@@ -2,8 +2,10 @@
 #define ONNX_INTERFACE_H
 
 #include <stddef.h>
-#include "decode.h"
-#include "flow.h"
+
+// Forward declarations to avoid including C headers in C++
+struct Packet;
+struct Flow;
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +21,7 @@ int OnnxPrefilterPredict(float *features, size_t len);
 void OnnxCleanup(void);
 
 // Хук для prefilter
-extern int OnnxPrefilterFlowHook(const Packet *p, const Flow *f);
+extern int OnnxPrefilterFlowHook(const struct Packet *p, const struct Flow *f);
 
 #ifdef __cplusplus
 }
