@@ -21,8 +21,8 @@ int OnnxPrefilterPredict(float *features, size_t len);
 // Освобождение ресурсов
 void OnnxCleanup(void);
 
-// Хук для prefilter
-extern int OnnxPrefilterFlowHook(const Packet *p, const Flow *f);
+// Хук для prefilter (объявлен в .c)
+int OnnxPrefilterFlowHook(const Packet *p, const Flow *f);
 
 #ifdef __cplusplus
 }
