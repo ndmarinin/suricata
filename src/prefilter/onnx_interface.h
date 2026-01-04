@@ -3,10 +3,6 @@
 
 #include <stddef.h>
 
-// Forward declarations to avoid including C headers in C++
-struct Packet;
-struct Flow;
-
 #ifdef __cplusplus
 extern "C" {
 #endif

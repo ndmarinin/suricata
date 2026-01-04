@@ -1,10 +1,8 @@
-#include "onnx_interface.h"  // обёртка C для C++ класса
 #include "suricata-common.h"
 #include "decode.h"
 #include "flow.h"
 #include "detect.h"
-
-extern uint64_t FlowGetAge(const struct Flow *f);
+#include "onnx_interface.h"  // обёртка C для C++ класса
 
 int OnnxPrefilterFlowHook(const struct Packet *p, const struct Flow *f) {
     float features[16];

@@ -17,6 +17,7 @@
 
 #include "suricata.h"
 #include "conf.h"
+#include "util-conf.h"
 #include "util-debug.h"
 #ifdef HAVE_ONNXRUNTIME
 #include "prefilter/onnx_interface.h"
@@ -56,12 +57,12 @@ int main(int argc, char **argv)
 
 #ifdef HAVE_ONNXRUNTIME
     // Инициализация ONNX модели из конфига
-    const char* model_path = ConfGet("prefilter.onnx-model", NULL);
+    const char* model_path = SCConfGet("prefilter.onnx-model", NULL);
     if (model_path == NULL) {
         SCLogError("ONNX model path not specified in configuration (prefilter.onnx-model)");
         exit(EXIT_FAILURE);
     }
-    const char* input_dim_str = ConfGet("prefilter.input-dim", NULL);
+    const char* input_dim_str = SCConfGet("prefilter.input-dim", NULL);
     size_t input_dim = 16;  // по умолчанию
     if (input_dim_str != NULL) {
         input_dim = atoi(input_dim_str);
