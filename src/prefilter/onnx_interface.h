@@ -2,6 +2,8 @@
 #define ONNX_INTERFACE_H
 
 #include <stddef.h>
+#include "decode.h"
+#include "flow.h"
 
 #ifdef __cplusplus
 extern "C" {

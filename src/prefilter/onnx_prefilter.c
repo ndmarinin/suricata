@@ -10,7 +10,7 @@ int OnnxPrefilterFlowHook(const Packet *p, const Flow *f) {
     // Преобразуем Flow в признаки (пример):
     features[0] = (float)p->sp;
     features[1] = (float)p->dp;
-    features[2] = (float)(f->lastts.tv_sec - f->startts.tv_sec);  // Длительность в секундах
+    features[2] = (float)FlowGetAge(f) / 1000000000.0f;  // Длительность в секундах
     features[15] = (float)p->proto;
 
     // Предсказание
