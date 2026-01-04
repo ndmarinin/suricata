@@ -12,7 +12,7 @@ int OnnxInit(const char* model_path, size_t input_dim);
 int OnnxPrefilterPredict(float *features, size_t len);
 
 // Освобождение ресурсов
-void OnnxCleanup();
+void OnnxCleanup(void);
 
 #ifdef __cplusplus
 }
