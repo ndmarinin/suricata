@@ -3,6 +3,11 @@
 
 #include <stddef.h>
 
+#ifndef __cplusplus
+#include "decode.h"
+#include "flow.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,7 +22,7 @@ int OnnxPrefilterPredict(float *features, size_t len);
 void OnnxCleanup(void);
 
 // Хук для prefilter
-extern int OnnxPrefilterFlowHook(const struct Packet *p, const struct Flow *f);
+extern int OnnxPrefilterFlowHook(const Packet *p, const Flow *f);
 
 #ifdef __cplusplus
 }
