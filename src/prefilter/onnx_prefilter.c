@@ -4,8 +4,6 @@
 #include "flow.h"
 #include "detect.h"
 
-extern int OnnxPrefilterPredict(float *features, size_t len);
-
 int OnnxPrefilterFlowHook(const Packet *p, const Flow *f) {
     float features[16];
 

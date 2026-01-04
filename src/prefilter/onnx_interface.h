@@ -1,6 +1,8 @@
 #ifndef ONNX_INTERFACE_H
 #define ONNX_INTERFACE_H
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -13,6 +15,9 @@ int OnnxPrefilterPredict(float *features, size_t len);
 
 // Освобождение ресурсов
 void OnnxCleanup(void);
+
+// Хук для prefilter
+extern int OnnxPrefilterFlowHook(const Packet *p, const Flow *f);
 
 #ifdef __cplusplus
 }

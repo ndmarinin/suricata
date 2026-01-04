@@ -16,9 +16,11 @@ public:
 
         session_ = Ort::Session(env_, model_path.c_str(), session_options);
 
-        allocator_ = Ort::AllocatorWithDefaultOptions();
-        input_name_ = session_.GetInputName(0, allocator_);
-        output_name_ = session_.GetOutputName(0, allocator_);
+        Ort::AllocatedStringPtr input_name_allocated = session_.GetInputNameAllocated(0, allocator_);
+        input_name_ = input_name_allocated.get();
+
+        Ort::AllocatedStringPtr output_name_allocated = session_.GetOutputNameAllocated(0, allocator_);
+        output_name_ = output_name_allocated.get();
     }
 
     int predict(const std::vector<float>& input_features) {
