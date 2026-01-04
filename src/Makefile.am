@@ -620,6 +620,11 @@ noinst_HEADERS = \
 	win32-syscall.h \
 	win32-syslog.h
 
+if HAVE_ONNX
+noinst_HEADERS += \
+	prefilter/onnx_interface.h
+endif
+
 libsuricata_c_a_SOURCES = \
 	alert-debuglog.c \
 	alert-fastlog.c \
@@ -1206,6 +1211,12 @@ libsuricata_c_a_SOURCES = \
 	win32-service.c \
 	win32-syscall.c
 
+if HAVE_ONNX
+libsuricata_c_a_SOURCES += \
+	prefilter/onnx_interface.cpp \
+	prefilter/onnx_prefilter.c
+endif
+
 EXTRA_DIST = \
 	${PRIVATE_INCLUDES} \
 	tests/stream-tcp-inline.c \
@@ -1288,7 +1299,7 @@ LDADD_GENERIC = "-Wl,--start-group,libsuricata_c.a,$(RUST_SURICATA_LIB),--end-gr
 else
 LDADD_GENERIC = libsuricata_c.a $(RUST_SURICATA_LIB) libsuricata_c.a $(RUST_SURICATA_LIB) $(RUST_LDADD)
 endif
-suricata_LDADD = $(LDADD_GENERIC)
+suricata_LDADD = $(LDADD_GENERIC) $(ONNXRUNTIME_LIBS)
 suricata_DEPENDENCIES = libsuricata_c.a $(RUST_SURICATA_LIB)
 
 if BUILD_SHARED_LIBRARY

@@ -584,6 +584,18 @@
     ])
     AM_CONDITIONAL([HAVE_COCCINELLE], [test "x$enable_coccinelle" != "xno"])
 
+    AC_ARG_ENABLE(onnx,
+           AS_HELP_STRING([--enable-onnx], [Enable ONNX Runtime support for ML prefiltering]), [enable_onnx="$enableval"], [enable_onnx=no])
+    AS_IF([test "x$enable_onnx" = "xyes"], [
+        PKG_CHECK_MODULES([ONNXRUNTIME], [onnxruntime], [
+            AC_DEFINE([HAVE_ONNXRUNTIME], [1], [ONNX Runtime available])
+            enable_onnx=yes
+        ], [
+            AC_MSG_ERROR([ONNX Runtime not found. Install onnxruntime-dev or similar.])
+        ])
+    ])
+    AM_CONDITIONAL([HAVE_ONNX], [test "x$enable_onnx" = "xyes"])
+
   # disable detection
     AC_ARG_ENABLE(detection,
            AS_HELP_STRING([--disable-detection], [Disable Detection Modules]), [enable_detection="$enableval"],[enable_detection=yes])

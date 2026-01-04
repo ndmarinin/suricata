@@ -16,6 +16,10 @@
  */
 
 #include "suricata.h"
+#include "conf.h"
+#ifdef HAVE_ONNXRUNTIME
+#include "prefilter/onnx_interface.h"
+#endif
 
 int main(int argc, char **argv)
 {
@@ -48,6 +52,24 @@ int main(int argc, char **argv)
     if (SCLoadYamlConfig() != TM_ECODE_OK) {
         exit(EXIT_FAILURE);
     }
+
+#ifdef HAVE_ONNXRUNTIME
+    // Инициализация ONNX модели из конфига
+    const char* model_path = ConfGet("prefilter.onnx-model", NULL);
+    if (model_path == NULL) {
+        SCLogError("ONNX model path not specified in configuration (prefilter.onnx-model)");
+        exit(EXIT_FAILURE);
+    }
+    const char* input_dim_str = ConfGet("prefilter.input-dim", NULL);
+    size_t input_dim = 16;  // по умолчанию
+    if (input_dim_str != NULL) {
+        input_dim = atoi(input_dim_str);
+    }
+    if (OnnxInit(model_path, input_dim) != 0) {
+        SCLogError("Failed to initialize ONNX model");
+        exit(EXIT_FAILURE);
+    }
+#endif
 
     /* Enable default signal handlers */
     SCEnableDefaultSignalHandlers();
@@ -166,6 +188,10 @@ int main(int argc, char **argv)
     }
     printf("\n");
     printf("================================\n\n");
+
+#ifdef HAVE_ONNXRUNTIME
+    OnnxCleanup();
+#endif
 
     exit(EXIT_SUCCESS);
 }
